@@ -15,14 +15,14 @@ export const AuthProvider = ({ children }) => {
   // Fungsi untuk menangani data login (baik dari lokal maupun Google)
   const processLoginData = useCallback((data) => {
     console.log("Processing login data:", data);
-    
+
     // Pastikan data dan token ada
     if (data && data.token) {
       try {
         // Validasi token dengan decode
         const decoded = jwtDecode(data.token);
         const currentTime = Date.now() / 1000;
-        
+
         if (decoded.exp > currentTime) {
           localStorage.setItem("userInfo", JSON.stringify(data));
           setUser(data);
@@ -66,30 +66,30 @@ export const AuthProvider = ({ children }) => {
     // --- LOGIKA BARU: Mendengarkan pesan dari jendela popup Google ---
     const handlePopupMessage = (event) => {
       console.log("Popup message received:", event);
-      
+
       // Daftar origin yang diizinkan
       const allowedOrigins = [
-        import.meta.env.VITE_APP_API_URL || 'http://localhost:5000',
-        'https://projek-web-kanban-production.up.railway.app',
-        'http://localhost:5000',
-        'http://localhost:3000'
+        import.meta.env.VITE_APP_API_URL || "http://localhost:5000",
+        "https://projek-web-kanban-production.up.railway.app",
+        "http://localhost:5000",
+        "http://localhost:3000",
       ];
 
       console.log("Event origin:", event.origin);
       console.log("Allowed origins:", allowedOrigins);
-      
+
       // Pastikan pesan datang dari sumber yang aman
       if (allowedOrigins.includes(event.origin)) {
         console.log("Origin verified, processing data...");
-        
+
         // Cek berbagai format data yang mungkin
         if (event.data && event.data.token) {
           console.log("Valid login data received, processing...", event.data);
           processLoginData(event.data);
-        } else if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+        } else if (event.data && event.data.type === "GOOGLE_AUTH_SUCCESS") {
           console.log("Google auth success message received");
           processLoginData(event.data.user);
-        } else if (event.data && event.data.type === 'GOOGLE_AUTH_ERROR') {
+        } else if (event.data && event.data.type === "GOOGLE_AUTH_ERROR") {
           console.error("Google auth error:", event.data.error);
         } else {
           console.log("Message received but no valid token found:", event.data);
@@ -99,10 +99,10 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    window.addEventListener('message', handlePopupMessage);
+    window.addEventListener("message", handlePopupMessage);
 
     return () => {
-      window.removeEventListener('message', handlePopupMessage);
+      window.removeEventListener("message", handlePopupMessage);
     };
   }, [processLoginData]);
 
@@ -126,12 +126,12 @@ export const AuthProvider = ({ children }) => {
       console.log("Attempting registration...");
       const response = await apiClient.post("/api/auth/register", userData);
       console.log("Registration response:", response.data);
-      
+
       // Jika registrasi berhasil dan langsung login
       if (response.data && response.data.token) {
         processLoginData(response.data);
       }
-      
+
       return response.data;
     } catch (error) {
       console.error("Registration failed:", error);
@@ -142,15 +142,19 @@ export const AuthProvider = ({ children }) => {
   // Fungsi Google Login - Buka popup
   const initiateGoogleLogin = () => {
     try {
-      const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:5000';
+      const API_URL =
+        import.meta.env.VITE_APP_API_URL || "http://localhost:5000";
       const googleAuthUrl = `${API_URL}/api/auth/google`;
-      
+
+      console.log("API_URL:", API_URL);
+      console.log("Full Google Auth URL:", googleAuthUrl);
+
       console.log("Opening Google auth popup:", googleAuthUrl);
-      
+
       const popup = window.open(
         googleAuthUrl,
-        'googleAuth',
-        'width=500,height=600,scrollbars=yes,resizable=yes'
+        "googleAuth",
+        "width=500,height=600,scrollbars=yes,resizable=yes"
       );
 
       // Monitor popup
