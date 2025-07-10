@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
+const generateToken = require('../utils/generateToken')
 
 // Google OAuth routes
 router.get('/google', 
