@@ -9,7 +9,7 @@ const cardRoutes = require('./cardRoutes');
 
 // Routes for a specific list (PUT /api/lists/:listId, DELETE /api/lists/:listId)
 router
-  .route(":/listId")
+  .route("/:listId")
   .put(protect, listController.updateList)
   .delete(protect, listController.deleteList);
 
