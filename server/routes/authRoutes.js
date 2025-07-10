@@ -1,34 +1,56 @@
-const express = require("express");
+// routes/authRoutes.js
+const express = require('express');
 const router = express.Router();
-const passport = require("passport");
-const { loginUser, registerUser } = require("../controllers/authController");
-const authController = require('../controllers/authController');
-const generateToken = require('../utils/generateToken'); 
+const passport = require('passport');
 
-// @route   POST /api/auth/register
-// @desc    Register a new User
-router.post("/register", registerUser);
+// Google OAuth routes
+router.get('/google', 
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
-// @route   POST /api/auth/login
-// @desc    User login and get Token
-router.post("/login", loginUser);
-
-// Rute untuk memulai proses otentikasi Google
-// Saat frontend mengakses URL ini, pengguna akan diarahkan ke halaman login Google
-router.get('/google', passport.authenticate('google', {
-    scope: ['profile', 'email'], // Data yang kita minta dari Google
-    session: false
-}));
-
-// Rute callback yang akan diakses Google setelah user login
-// Ini adalah rute yang menjalankan strategi di passport-setup.js,
-// lalu jika berhasil, akan memanggil controller googleLoginCallback.
 router.get('/google/callback',
-    passport.authenticate('google', {
-        session: false,
-        failureRedirect: `${process.env.CLIENT_URL}/login?error=google_failed` // Redirect jika gagal
-    }),
-    authController.googleLoginCallback // Panggil controller baru kita jika berhasil
+  passport.authenticate('google', { session: false }),
+  async (req, res) => {
+    try {
+      // Generate JWT token
+      const token = generateToken(req.user._id);
+      
+      // Prepare user data
+      const userData = {
+        _id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+        provider: req.user.provider,
+        profilePictureUrl: req.user.profilePictureUrl,
+        token: token
+      };
+
+      // Send message to parent window (frontend)
+      res.send(`
+        <script>
+          console.log('Google auth callback successful');
+          window.opener.postMessage({
+            type: 'GOOGLE_AUTH_SUCCESS',
+            user: ${JSON.stringify(userData)}
+          }, '${process.env.CLIENT_URL}');
+          window.close();
+        </script>
+      `);
+    } catch (error) {
+      console.error('Google auth callback error:', error);
+      res.send(`
+        <script>
+          console.error('Google auth callback failed');
+          window.opener.postMessage({
+            type: 'GOOGLE_AUTH_ERROR',
+            error: 'Authentication failed'
+          }, '${process.env.CLIENT_URL}');
+          window.close();
+        </script>
+      `);
+    }
+  }
 );
 
 module.exports = router;

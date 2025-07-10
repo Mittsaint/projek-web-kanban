@@ -8,7 +8,7 @@ console.log('API_URL:', API_URL);
 // Instance Axios dengan baseURL yang benar
 const apiClient = axios.create({
   baseURL: API_URL, // HANYA alamat dasar server, tanpa '/api'
-  timeout: 10000, // 10 detik timeout
+  timeout: 30000, // 30 detik timeout
   withCredentials: true, // Penting untuk CORS dengan credentials
   headers: {
     'Content-Type': 'application/json',
@@ -84,10 +84,19 @@ export const testConnection = async () => {
 
 // Export fungsi helper untuk berbagai jenis request
 export const api = {
-  // Auth endpoints
-  register: (userData) => apiClient.post('/api/auth/register', userData),
-  login: (credentials) => apiClient.post('/api/auth/login', credentials),
-  googleAuth: () => apiClient.get('/api/auth/google'),
+  // Auth endpoints - PASTIKAN PATH BENAR
+  register: (userData) => {
+    console.log('Registering user to:', '/api/auth/register');
+    return apiClient.post('/api/auth/register', userData);
+  },
+  login: (credentials) => {
+    console.log('Logging in to:', '/api/auth/login');
+    return apiClient.post('/api/auth/login', credentials);
+  },
+  googleAuth: () => {
+    console.log('Google auth to:', '/api/auth/google');
+    return apiClient.get('/api/auth/google');
+  },
   
   // User endpoints
   getProfile: () => apiClient.get('/api/users/profile'),
