@@ -14,7 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 
 import boardService from "../services/boardService";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 // Import komponen-komponen terpisah
 import ListColumn from "../components/board/ListColumn";
