@@ -69,5 +69,7 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/checklists", checklistsApiRoutes);
 app.use("/api/dnd", protect, dndRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
