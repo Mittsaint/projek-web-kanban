@@ -2,6 +2,8 @@
 const Board = require("../models/Board");
 const User = require("../models/User");
 const Label = require("../models/Label");
+const List = require("../models/List"); // Add this line
+const Card = require("../models/Card"); // Add this line
 const logActivity = require("../utils/logger");
 
 // Helper function to check user access (member or owner)
