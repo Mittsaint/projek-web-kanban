@@ -25,10 +25,10 @@ const BoardSchema = new Schema({
     type: Boolean,
     default: false,
   },
-   description: {
+  description: {
     type: String,
     default: "",
-
+  },
   createdAt: {
     type: Date,
     default: Date.now,
