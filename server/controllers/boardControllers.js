@@ -392,30 +392,30 @@ exports.addMemberToBoard = async (req, res) => {
   });
 };
 
-exports.joinBoard = async (req, res) => {
-  try {
-    const board = await Board.findById(req.params.id);
-    if (!board) return res.status(404).json({ message: "Board not found" });
+// exports.joinBoard = async (req, res) => {
+//   try {
+//     const board = await Board.findById(req.params.id);
+//     if (!board) return res.status(404).json({ message: "Board not found" });
 
-    const alreadyMember = board.members.some(
-      (member) => member.toString() === req.user._id.toString()
-    );
+//     const alreadyMember = board.members.some(
+//       (member) => member.toString() === req.user._id.toString()
+//     );
 
-    if (!alreadyMember) {
-      board.members.push(req.user._id);
-      await board.save();
+//     if (!alreadyMember) {
+//       board.members.push(req.user._id);
+//       await board.save();
 
-      await logActivity({
-        boardId: board._id,
-        userId: req.user.id,
-        actionType: "JOIN_BOARD",
-        description: `${req.user.email} joined the board.`,
-      });
-    }
+//       await logActivity({
+//         boardId: board._id,
+//         userId: req.user.id,
+//         actionType: "JOIN_BOARD",
+//         description: `${req.user.email} joined the board.`,
+//       });
+//     }
 
-    return res.status(200).json({ message: "Joined board successfully" });
-  } catch (err) {
-    console.error("Join board error:", err);
-    return res.status(500).json({ message: "Server Error" });
-  }
-};
+//     return res.status(200).json({ message: "Joined board successfully" });
+//   } catch (err) {
+//     console.error("Join board error:", err);
+//     return res.status(500).json({ message: "Server Error" });
+//   }
+// };
