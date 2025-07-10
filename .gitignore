@@ -1,6 +1,6 @@
 # client
 client/node_modules
-client/.env
+client/.env.local
 client/dist
 client/build
 
