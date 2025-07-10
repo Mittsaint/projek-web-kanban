@@ -8,27 +8,36 @@ const generateToken = require('../utils/generateToken');
 // ===========================
 // Manual Register
 // ===========================
-router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  console.log("Login attempt:", email);
 
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      console.log("❌ User not found");
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (user.provider !== "local") {
+      console.log("❌ Login attempted for Google account");
+      return res.status(401).json({ message: "Please login using Google" });
+    }
 
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      provider: "local"
-    });
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      console.log("❌ Password mismatch");
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
 
     const token = generateToken(user._id);
 
-    res.status(201).json({
+    console.log("✅ Login successful for", email);
+
+    res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
@@ -36,10 +45,11 @@ router.post('/register', async (req, res) => {
       token
     });
   } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({ message: "Registration failed" });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Login failed" });
   }
 });
+
 
 // ===========================
 // Manual Login
