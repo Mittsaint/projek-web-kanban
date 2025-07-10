@@ -1,14 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const passport = require('passport');
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const generateToken = require('../utils/generateToken');
+const passport = require("passport");
+const bcrypt = require("bcryptjs");
+const User = require("../models/User");
+const generateToken = require("../utils/generateToken");
 
 // ===========================
 // Manual Register
 // ===========================
-router.post('/register', async (req, res) => {
+router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
@@ -23,17 +23,19 @@ router.post('/register', async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      provider: "local"
+      provider: "local",
     });
 
     const token = generateToken(user._id);
+    console.log("Registering:", name, email);
+    console.log("Plain password received:", password);
 
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       provider: user.provider,
-      token
+      token,
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -44,7 +46,7 @@ router.post('/register', async (req, res) => {
 // ===========================
 // Manual Login
 // ===========================
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   console.log("Login attempt:", email);
@@ -78,7 +80,7 @@ router.post('/login', async (req, res) => {
       name: user.name,
       email: user.email,
       provider: user.provider,
-      token
+      token,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -89,12 +91,14 @@ router.post('/login', async (req, res) => {
 // ===========================
 // Google OAuth routes
 // ===========================
-router.get('/google', 
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-router.get('/google/callback',
-  passport.authenticate('google', { session: false }),
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false }),
   async (req, res) => {
     try {
       const token = generateToken(req.user._id);
@@ -106,7 +110,7 @@ router.get('/google/callback',
         role: req.user.role,
         provider: req.user.provider,
         profilePictureUrl: req.user.profilePictureUrl,
-        token
+        token,
       };
 
       res.send(`
@@ -119,7 +123,7 @@ router.get('/google/callback',
         </script>
       `);
     } catch (error) {
-      console.error('Google auth callback error:', error);
+      console.error("Google auth callback error:", error);
       res.send(`
         <script>
           window.opener.postMessage({
