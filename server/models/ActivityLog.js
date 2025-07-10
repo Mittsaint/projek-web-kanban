@@ -1,6 +1,4 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-
+// ==================== ActivityLog Schema ====================
 const ActivityLogSchema = new Schema(
   {
     BoardId: {
@@ -16,13 +14,12 @@ const ActivityLogSchema = new Schema(
     cardId: {
       type: Schema.Types.ObjectId,
       ref: "Card",
-      // cardId is optional, so no 'required: true'
+      // cardId is optional
     },
     description: {
       type: String,
       required: true,
     },
-    // 'actionType' can be used in the frontend with different icons
     actionType: {
       type: String,
       enum: [
@@ -40,7 +37,7 @@ const ActivityLogSchema = new Schema(
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    timestamps: true, // adds createdAt and updatedAt automatically
   }
 );
 

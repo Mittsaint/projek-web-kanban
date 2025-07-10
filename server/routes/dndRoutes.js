@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 const { moveCard, updateListOrder, updateCardOrder } = require("../controllers/dndController");
 
-// Route untuk move card (dipanggil dari boardRoutes)
-router.moveCard = moveCard;
+// Route untuk memindahkan card
+router.put("/move", moveCard); // FIX: ubah jadi router.put agar bisa diakses dan sesuai RESTful
 
-// Route untuk update list order
+// Route untuk update urutan list
 router.post("/list", updateListOrder);
 
-// Route untuk update card order (jika menggunakan endpoint terpisah)
+// Route untuk update urutan card
 router.post("/card", updateCardOrder);
 
 module.exports = router;

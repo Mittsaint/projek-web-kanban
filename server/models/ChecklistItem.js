@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+// ==================== ChecklistItem Schema ====================
 const ChecklistItemSchema = new Schema({
   text: {
     type: String,

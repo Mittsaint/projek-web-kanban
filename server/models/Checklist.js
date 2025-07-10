@@ -1,6 +1,4 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-
+// ==================== Checklist Schema ====================
 const ChecklistSchema = new Schema({
   title: {
     type: String,

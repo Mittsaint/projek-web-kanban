@@ -23,7 +23,6 @@ exports.createComment = async (req, res) => {
     const populatedComment = await Comment.findById(newComment._id)
       .populate("userId", "name email");
 
-    // ✅ Logging aktivitas tanpa menghentikan proses jika gagal
     logActivity({
       boardId: card.boardId,
       userId: req.user.id,
@@ -41,14 +40,11 @@ exports.createComment = async (req, res) => {
   }
 };
 
-
-// @desc    Get all comments for a specific card
-// @route   GET /api/cards/:cardId/comments
 exports.getCommentsByCard = async (req, res) => {
   try {
     const comments = await Comment.find({ cardId: req.params.cardId })
-      .populate("userId", "name email") // Tampilkan juga info user yang berkomentar
-      .sort({ createdAt: "asc" }); // Urutkan dari yang paling lama
+      .populate("userId", "name email")
+      .sort({ createdAt: "asc" });
 
     res.json(comments);
   } catch (err) {
@@ -57,14 +53,12 @@ exports.getCommentsByCard = async (req, res) => {
   }
 };
 
-// Update a Comment
 exports.updateComment = async (req, res) => {
   try {
     let comment = await Comment.findById(req.params.commentId);
     if (!comment) {
       return res.status(404).json({ msg: "Comment not found" });
     }
-    // Cek apakah user adalah pembuat komentar
     if (comment.userId.toString() !== req.user.id) {
       return res.status(401).json({ msg: "User not authorized" });
     }
@@ -80,7 +74,6 @@ exports.updateComment = async (req, res) => {
   }
 };
 
-// Delete a Comment
 exports.deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.commentId);

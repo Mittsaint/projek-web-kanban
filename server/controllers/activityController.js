@@ -32,16 +32,13 @@ exports.getAllUserActivities = async (req, res) => {
     const boardIds = userBoards.map(board => board._id);
 
     // Find all activities associated with these boards and the user
-    // We filter by BoardId (boards the user is a member of) AND userId (activities performed by the user)
-    // This ensures we only show activities on boards they have access to, and optionally, activities they performed.
-    // If you want *all* activities on boards they are a member of (even by other members), remove the userId filter.
     const activities = await ActivityLog.find({
-      BoardId: { $in: boardIds }, // Activities on boards the user is a member of
-      userId: req.user.id // Activities performed by the current user
+      BoardId: { $in: boardIds },
+      userId: req.user.id
     })
-      .populate("userId", "name email") // Populate user info
-      .populate("BoardId", "title") // Populate board title
-      .sort({ createdAt: -1 }); // Sort by newest first
+      .populate("userId", "name email")
+      .populate("BoardId", "title")
+      .sort({ createdAt: -1 });
 
     res.json(activities);
   } catch (err) {

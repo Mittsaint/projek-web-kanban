@@ -3,7 +3,7 @@ const ActivityLog = require("../models/ActivityLog");
 const logActivity = async ({ boardId, userId, cardId, actionType, description }) => {
   try {
     const activity = new ActivityLog({
-      BoardId: boardId,
+      BoardId: boardId, // Note: Field name uses capital B, match schema
       userId,
       cardId,
       actionType,

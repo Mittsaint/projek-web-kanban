@@ -2,18 +2,11 @@ import apiClient from "./apiClient";
 
 const handleError = (message, error) => {
   console.error(message, error);
-  // Re-throw the error to be caught by the calling function
   throw error.response?.data || new Error(message);
 };
 
-/**
- * Service object for handling all board, list, card, and related API requests.
- * Functions are grouped by the entity they interact with (e.g., boards, lists, cards).
- */
 const boardService = {
-  // --- Board Management ---
   boards: {
-    // Fetches all ACTIVE boards
     async getAll() {
       try {
         const response = await apiClient.get("/api/boards");
@@ -23,35 +16,23 @@ const boardService = {
       }
     },
 
-    /**
-     * Fetches complete details for a single board, including its lists and cards.
-     * @param {string} boardId - The ID of the board.
-     * @returns {Promise<object>} An object containing the board details.
-     */
     async getDetails(boardId) {
       try {
-        // Langkah 1: Ambil detail board dasar & semua label yang tersedia di board ini
         const boardPromise = apiClient.get(`/api/boards/${boardId}`);
         const labelsPromise = apiClient.get(`/api/boards/${boardId}/labels`);
-
-        // Langkah 2: Ambil semua list yang ada di board ini
         const listsPromise = apiClient.get(`/api/boards/${boardId}/lists`);
 
-        // Jalankan semua promise di atas secara paralel
         const [boardResponse, labelsResponse, listsResponse] =
           await Promise.all([boardPromise, labelsPromise, listsPromise]);
 
         const boardDetails = boardResponse.data;
-        boardDetails.labels = labelsResponse.data; // Simpan daftar label ke objek board
+        boardDetails.labels = labelsResponse.data;
 
         let lists = listsResponse.data;
-
-        // Jika tidak ada list, langsung kembalikan data board
         if (lists.length === 0) {
           return { ...boardDetails, lists: [] };
         }
 
-        // Langkah 3: Ambil semua kartu untuk semua list secara paralel
         const cardPromises = lists.flatMap((list) =>
           apiClient.get(`/api/lists/${list._id}/cards`)
         );
@@ -59,13 +40,11 @@ const boardService = {
         const cardHttpResponses = await Promise.all(cardPromises);
         const cardsByList = cardHttpResponses.map((res) => res.data);
 
-        // Gabungkan kartu ke list masing-masing
         lists = lists.map((list, index) => ({
           ...list,
           cards: cardsByList[index],
         }));
 
-        // Langkah 4: Ambil semua checklist untuk semua kartu yang ada
         const allCards = lists.flatMap((list) => list.cards);
         if (allCards.length > 0) {
           const checklistPromises = allCards.map((card) =>
@@ -76,13 +55,11 @@ const boardService = {
             (res) => res.data
           );
 
-          // Buat map untuk akses cepat: { cardId: [checklists] }
           const checklistsMap = allCards.reduce((acc, card, index) => {
             acc[card._id] = checklistsByCard[index];
             return acc;
           }, {});
 
-          // Pasang checklists ke setiap objek kartu
           lists.forEach((list) => {
             list.cards.forEach((card) => {
               card.checklists = checklistsMap[card._id] || [];
@@ -96,11 +73,6 @@ const boardService = {
       }
     },
 
-    /**
-     * Creates a new board.
-     * @param {{ title: string }} boardData - The data for the new board.
-     * @returns {Promise<object>} The newly created board object.
-     */
     async create(boardData) {
       try {
         const response = await apiClient.post("/api/boards", boardData);
@@ -110,12 +82,6 @@ const boardService = {
       }
     },
 
-    /**
-     * Updates a board's properties (e.g., title).
-     * @param {string} boardId - The ID of the board to update.
-     * @param {object} boardData - The data to update.
-     * @returns {Promise<object>}
-     */
     async update(boardId, boardData) {
       try {
         const response = await apiClient.put(
@@ -128,11 +94,6 @@ const boardService = {
       }
     },
 
-    /**
-     * Archives a board.
-     * @param {string} boardId - The ID of the board to archive.
-     * @returns {Promise<object>}
-     */
     async archive(boardId) {
       try {
         const response = await apiClient.put(`/api/boards/${boardId}/archive`);
@@ -142,7 +103,6 @@ const boardService = {
       }
     },
 
-    // Fetches all ARCHIVED boards
     async getArchived() {
       try {
         const response = await apiClient.get("/api/boards/archived");
@@ -152,7 +112,6 @@ const boardService = {
       }
     },
 
-    // Un-archives a board
     async unarchive(boardId) {
       try {
         const response = await apiClient.put(
@@ -164,7 +123,6 @@ const boardService = {
       }
     },
 
-    // Permanently deletes a board
     async deletePermanently(boardId) {
       try {
         const response = await apiClient.delete(
@@ -176,11 +134,6 @@ const boardService = {
       }
     },
 
-    /**
-     * Fetches the activity log for a board.
-     * @param {string} boardId - The ID of the board.
-     * @returns {Promise<Array<object>>}
-     */
     async getActivity(boardId) {
       try {
         const response = await apiClient.get(
@@ -191,25 +144,19 @@ const boardService = {
         handleError(`Error fetching activity for board ${boardId}:`, error);
       }
     },
-    /**
-     * Moves a card from one list to another or reorders within the same list
-     * @param {string} boardId - The ID of the board
-     * @param {object} payload - The move data
-     * @returns {Promise<object>}
-     */
+
     async moveCard(boardId, payload) {
       try {
-        console.log("📤 Sending moveCard request:", payload);
         const response = await apiClient.put(
           `/api/boards/${boardId}/dnd`,
           payload
         );
         return response.data;
       } catch (error) {
-        console.error("❌ Error moving card:", error.response?.data || error);
         handleError(`Error moving card on board ${boardId}:`, error);
       }
     },
+
     async togglePin(boardId) {
       try {
         const response = await apiClient.put(

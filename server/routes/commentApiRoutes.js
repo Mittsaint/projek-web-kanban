@@ -1,3 +1,4 @@
+// commentApiRoutes.js
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
@@ -8,7 +9,7 @@ const {
 
 // URL  /api/comments/:commentId
 router
-  .route("/:commentId")
+  .route(":/commentId")
   .put(protect, updateComment)
   .delete(protect, deleteComment);
 

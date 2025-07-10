@@ -24,7 +24,7 @@ exports.createChecklist = async (req, res) => {
 exports.getChecklistsByCard = async (req, res) => {
   try {
     const checklists = await Checklist.find({ cardId: req.params.cardId }).sort("position");
-    
+
     // --- PENDEKATAN BARU YANG LEBIH ROBUST ---
     const checklistsWithItems = [];
     for (const checklist of checklists) {
@@ -40,6 +40,7 @@ exports.getChecklistsByCard = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 // @desc    Add an item to a checklist
 // @route   POST /api/checklists/:checklistId/items
 exports.addChecklistItem = async (req, res) => {

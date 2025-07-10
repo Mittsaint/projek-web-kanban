@@ -5,52 +5,44 @@ const logActivity = require("../utils/logger");
 // @desc Handle card drag and drop operations
 // @route PUT /api/boards/:boardId/dnd
 exports.moveCard = async (req, res) => {
-  console.log("🔥 DND Triggered!");
+  console.log("\uD83D\uDD25 DND Triggered!");
   console.log(req.body);
 
   const {
     cardId,
     sourceListId,
     destListId,
-    newPosition, // New position (index) in the destination list
+    newPosition,
   } = req.body;
 
   try {
-    // Scenario 1: Cards are moved within the same list
     if (sourceListId === destListId) {
-      // Update the positions of all cards in the list
       await Card.updateMany(
-        { listId: sourceListId, _id: { $ne: cardId } }, // All other cards in the same list
-        { $inc: { position: 1 } } // Move their positions
+        { listId: sourceListId, _id: { $ne: cardId } },
+        { $inc: { position: 1 } }
       );
       await Card.updateOne({ _id: cardId }, { position: newPosition });
-    }
-    // Scenario 2: Cards are moved to a different list
-    else {
-      // 1. Update the listId and position of the moved card
+    } else {
       await Card.findByIdAndUpdate(cardId, {
         listId: destListId,
         position: newPosition,
       });
 
-      // 2. Update the position of the cards in the OLD list (source)
       await Card.updateMany(
         { listId: sourceListId, position: { $gt: req.body.oldPosition } },
-        { $inc: { position: -1 } } // Move up (position decreases)
+        { $inc: { position: -1 } }
       );
 
-      // 3. Update the position of the cards in the NEW list (destination)
       await Card.updateMany(
         {
           listId: destListId,
           _id: { $ne: cardId },
           position: { $gte: newPosition },
         },
-        { $inc: { position: 1 } } // Move down (position increases)
+        { $inc: { position: 1 } }
       );
     }
 
-    // Activity log (optional, but nice to have)
     const card = await Card.findById(cardId);
     const sourceList = await List.findById(sourceListId);
     const destList = await List.findById(destListId);
@@ -70,10 +62,10 @@ exports.moveCard = async (req, res) => {
   }
 };
 
-// @desc    Update list positions after drag and drop
-// @route   POST /api/dnd/list
+// @desc Update list positions after drag and drop
+// @route POST /api/dnd/list
 exports.updateListOrder = async (req, res) => {
-  const { boardId, orderedLists } = req.body; // orderedLists adalah array of { _id, position }
+  const { boardId, orderedLists } = req.body;
 
   try {
     const bulkOps = orderedLists.map((list) => ({
@@ -94,18 +86,15 @@ exports.updateListOrder = async (req, res) => {
   }
 };
 
-// @desc    Update card positions after drag and drop (within or between lists)
-// @route   POST /api/dnd/card
+// @desc Update card positions after drag and drop (within or between lists)
+// @route POST /api/dnd/card
 exports.updateCardOrder = async (req, res) => {
-  console.log("🔥 Masuk ke updateCardOrder");
+  console.log("\uD83D\uDD25 Masuk ke updateCardOrder");
   console.log(req.body);
   const { boardId, sourceList, destList } = req.body;
-  console.log("📥 Received DND request:", req.body);
-
-  // sourceList & destList adalah array of { _id, position, listId }
+  console.log("\uD83D\uDCE5 Received DND request:", req.body);
 
   try {
-    // Gabungkan operasi dari list sumber dan tujuan jika berbeda
     const allCardsToUpdate = [...sourceList];
     if (sourceList[0]?.listId !== destList[0]?.listId) {
       allCardsToUpdate.push(...destList);

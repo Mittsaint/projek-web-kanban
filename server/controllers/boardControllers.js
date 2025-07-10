@@ -4,6 +4,14 @@ const User = require("../models/User");
 const Label = require("../models/Label");
 const logActivity = require("../utils/logger");
 
+// Helper function to check user access (member or owner)
+const hasBoardAccess = (board, userId) => {
+  return (
+    board.ownerId.toString() === userId ||
+    board.members.some((member) => member.toString() === userId)
+  );
+};
+
 // Create new board
 exports.createBoard = async (req, res) => {
   const { title } = req.body;
@@ -16,29 +24,28 @@ exports.createBoard = async (req, res) => {
     });
 
     const board = await newBoard.save();
-    // 2. Definisikan label default
+
     const defaultLabels = [
-      { name: "Feature", color: "#60A5FA" }, // blue-400
-      { name: "Bug", color: "#F87171" }, // red-400
-      { name: "Refactor", color: "#FBBF24" }, // amber-400
-      { name: "Testing", color: "#34D399" }, // emerald-400
-      { name: "Docs", color: "#A78BFA" }, // violet-400
+      { name: "Feature", color: "#60A5FA" },
+      { name: "Bug", color: "#F87171" },
+      { name: "Refactor", color: "#FBBF24" },
+      { name: "Testing", color: "#34D399" },
+      { name: "Docs", color: "#A78BFA" },
     ];
 
-    // 3. Buat semua label default untuk board yang baru ini
     const labelsToCreate = defaultLabels.map((label) => ({
       ...label,
       boardId: board._id,
     }));
     await Label.insertMany(labelsToCreate);
 
-    // Log this activity
     await logActivity({
-      boardId: board._id, // Changed from boardId to BoardId
+      boardId: board._id,
       userId: req.user.id,
       actionType: "CREATE_BOARD",
-      description: `created board "${board.title}"`,
+      description: `created board \"${board.title}\"`,
     });
+
     res.status(201).json(board);
   } catch (err) {
     console.error(err.message);
@@ -46,13 +53,12 @@ exports.createBoard = async (req, res) => {
   }
 };
 
-// Get all ACTIVE boards for a user
+// Get all active boards
 exports.getBoards = async (req, res) => {
   try {
-    // Find boards where the user is a member and the board is not archived
     const boards = await Board.find({
       members: req.user.id,
-      isArchived: false, // Only get active boards
+      isArchived: false,
     }).populate("ownerId", "name email");
     res.json(boards);
   } catch (err) {
@@ -61,13 +67,12 @@ exports.getBoards = async (req, res) => {
   }
 };
 
-// Get all ARCHIVED boards for a user
+// Get archived boards
 exports.getArchivedBoards = async (req, res) => {
   try {
-    // Find boards where the user is a member and the board is archived
     const boards = await Board.find({
       members: req.user.id,
-      isArchived: true, // Only get archived boards
+      isArchived: true,
     }).populate("ownerId", "name email");
     res.json(boards);
   } catch (err) {
@@ -76,56 +81,42 @@ exports.getArchivedBoards = async (req, res) => {
   }
 };
 
-// Get a single board by ID
+// Get board by ID with access validation
 exports.getBoardById = async (req, res) => {
   try {
     const board = await Board.findById(req.params.boardId)
-      .populate("ownerId", "name email")
-      .populate("members", "name email"); // Populate owner and members
+      .populate("members", "name email") 
+      .populate("ownerId", "name email"); 
+
     if (!board) {
       return res.status(404).json({ msg: "Board not found" });
     }
-    // Check if the user is a member of the board
-    if (
-      !board.members.some((member) => member._id.toString() === req.user.id)
-    ) {
-      return res
-        .status(401)
-        .json({ msg: "User not authorized to view this board" });
-    }
-    res.json(board);
-  } catch (err) {
-    console.error(err.message);
-    if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Board not found" });
-    }
-    res.status(500).send("Server Error");
+
+    res.status(200).json(board);
+  } catch (error) {
+    console.error("Error fetching board:", error);
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
-// Update Board Title
+// Update board title (only owner)
 exports.updateBoard = async (req, res) => {
   try {
     const board = await Board.findById(req.params.boardId);
+    if (!board) return res.status(404).json({ msg: "Board not found" });
 
-    if (!board) {
-      return res.status(404).json({ msg: "Board not found" });
-    }
-
-    // Check if user is the owner
     if (board.ownerId.toString() !== req.user.id) {
-      return res.status(401).json({ msg: "User not authorized" });
+      return res.status(403).json({ msg: "Only owner can update" });
     }
 
     board.title = req.body.title || board.title;
     const updatedBoard = await board.save();
 
-    // Activity Log
     await logActivity({
-      boardId: board._id, // Changed from boardId to BoardId
+      boardId: board._id,
       userId: req.user.id,
       actionType: "UPDATE_BOARD",
-      description: `changed board name to "${updatedBoard.title}"`,
+      description: `changed board name to \"${updatedBoard.title}\"`,
     });
 
     res.json(updatedBoard);
@@ -135,60 +126,53 @@ exports.updateBoard = async (req, res) => {
   }
 };
 
-// Archive a board
+// Archive board (only owner)
 exports.archiveBoard = async (req, res) => {
   try {
     const board = await Board.findById(req.params.boardId);
+    if (!board) return res.status(404).json({ msg: "Board not found" });
 
-    if (!board) {
-      return res.status(404).json({ msg: "Board not found" });
-    }
-
-    // Check if user is the owner to archive
     if (board.ownerId.toString() !== req.user.id) {
-      return res.status(401).json({ msg: "User not authorized" });
+      return res.status(403).json({ msg: "Only owner can archive" });
     }
 
     board.isArchived = true;
     await board.save();
 
-    // Log this activity
     await logActivity({
       boardId: board._id,
       userId: req.user.id,
       actionType: "ARCHIVE_BOARD",
-      description: `archived board "${board.title}"`,
+      description: `archived board \"${board.title}\"`,
     });
 
     res.json({ msg: "Board archived successfully" });
   } catch (err) {
     console.error(err.message);
-    if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Board not found" });
-    }
     res.status(500).send("Server Error");
   }
 };
 
-// UN-Archive a board
+// Unarchive board (only owner)
 exports.unarchiveBoard = async (req, res) => {
   try {
     const board = await Board.findById(req.params.boardId);
-    if (!board) {
-      return res.status(404).json({ msg: "Board not found" });
-    }
+    if (!board) return res.status(404).json({ msg: "Board not found" });
+
     if (board.ownerId.toString() !== req.user.id) {
-      return res.status(401).json({ msg: "User not authorized" });
+      return res.status(403).json({ msg: "Only owner can unarchive" });
     }
+
     board.isArchived = false;
     await board.save();
-    // Optional: Log this activity
+
     await logActivity({
       boardId: board._id,
       userId: req.user.id,
       actionType: "UNARCHIVE_BOARD",
-      description: `unarchived board "${board.title}"`,
+      description: `unarchived board \"${board.title}\"`,
     });
+
     res.json({ msg: "Board unarchived successfully" });
   } catch (err) {
     console.error(err.message);
@@ -196,29 +180,25 @@ exports.unarchiveBoard = async (req, res) => {
   }
 };
 
-// PERMANENTLY Delete a board
+// Delete board (only owner)
 exports.deleteBoardPermanently = async (req, res) => {
   try {
     const board = await Board.findById(req.params.boardId);
-    if (!board) {
-      return res.status(404).json({ msg: "Board not found" });
-    }
-    if (board.ownerId.toString() !== req.user.id) {
-      return res.status(401).json({ msg: "User not authorized" });
-    }
+    if (!board) return res.status(404).json({ msg: "Board not found" });
 
-    // TODO: Before deleting the board, you should also delete all associated lists, cards, etc.
-    // This requires more complex logic. For now, we just delete the board itself.
+    if (board.ownerId.toString() !== req.user.id) {
+      return res.status(403).json({ msg: "Only owner can delete" });
+    }
 
     await Board.findByIdAndDelete(req.params.boardId);
 
-    // Optional: Log this activity
     await logActivity({
       boardId: req.params.boardId,
       userId: req.user.id,
       actionType: "DELETE_BOARD_PERMANENTLY",
-      description: `permanently deleted board "${board.title}"`,
+      description: `permanently deleted board \"${board.title}\"`,
     });
+
     res.json({ msg: "Board permanently deleted" });
   } catch (err) {
     console.error(err.message);
@@ -282,8 +262,8 @@ exports.updateBoardLayout = async (req, res) => {
       bulkOps.push({
         updateOne: {
           filter: { _id: list._id },
-          update: { position: listIndex }
-        }
+          update: { position: listIndex },
+        },
       });
 
       // Operasi untuk update posisi dan listId setiap kartu
@@ -291,22 +271,41 @@ exports.updateBoardLayout = async (req, res) => {
         bulkOps.push({
           updateOne: {
             filter: { _id: card._id },
-            update: { position: cardIndex, listId: list._id }
-          }
+            update: { position: cardIndex, listId: list._id },
+          },
         });
       });
     });
 
     // Pisahkan operasi untuk List dan Card
-    const listOps = bulkOps.filter(op => op.updateOne.filter._id.toString().length === 24 && List.exists({_id: op.updateOne.filter._id})); // Filter berdasarkan model
-    const cardOps = bulkOps.filter(op => op.updateOne.filter._id.toString().length === 24 && Card.exists({_id: op.updateOne.filter._id}));
-
+    const listOps = bulkOps.filter(
+      (op) =>
+        op.updateOne.filter._id.toString().length === 24 &&
+        List.exists({ _id: op.updateOne.filter._id })
+    ); // Filter berdasarkan model
+    const cardOps = bulkOps.filter(
+      (op) =>
+        op.updateOne.filter._id.toString().length === 24 &&
+        Card.exists({ _id: op.updateOne.filter._id })
+    );
 
     if (listOps.length > 0) {
-      await List.bulkWrite(listOps.map(op => op.updateOne.filter._id.toString().length === 24 ? op : null).filter(Boolean));
+      await List.bulkWrite(
+        listOps
+          .map((op) =>
+            op.updateOne.filter._id.toString().length === 24 ? op : null
+          )
+          .filter(Boolean)
+      );
     }
     if (cardOps.length > 0) {
-      await Card.bulkWrite(cardOps.map(op => op.updateOne.filter._id.toString().length === 24 ? op : null).filter(Boolean));
+      await Card.bulkWrite(
+        cardOps
+          .map((op) =>
+            op.updateOne.filter._id.toString().length === 24 ? op : null
+          )
+          .filter(Boolean)
+      );
     }
 
     res.status(200).json({ message: "Board layout updated successfully" });
@@ -326,9 +325,50 @@ exports.togglePinBoard = async (req, res) => {
     board.isPinned = !board.isPinned;
     await board.save();
 
-    res.json({ msg: `Board ${board.isPinned ? "pinned" : "unpinned"}`, isPinned: board.isPinned });
+    res.json({
+      msg: `Board ${board.isPinned ? "pinned" : "unpinned"}`,
+      isPinned: board.isPinned,
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
   }
-}
+};
+
+exports.addMemberToBoard = async (req, res) => {
+  const { email } = req.body;
+  const { boardId } = req.params;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ msg: "User not found" });
+
+  const board = await Board.findById(boardId);
+  if (!board) return res.status(404).json({ msg: "Board not found" });
+
+  // Optional: Only owner can invite
+  if (board.ownerId.toString() !== req.user.id) {
+    return res.status(403).json({ msg: "Only the board owner can invite members" });
+  }
+
+  if (!board.members.includes(user._id)) {
+    board.members.push(user._id);
+    await board.save();
+
+    await logActivity({
+      boardId,
+      userId: req.user.id,
+      actionType: "ADD_MEMBER",
+      description: `added ${user.email} to the board`,
+    });
+  }
+
+  res.status(200).json({
+    msg: "Member added",
+    member: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+  });
+};
+

@@ -23,7 +23,7 @@ router
 
 // Route for a specific board
 router
-  .route("/:boardId")
+  .route(":/boardId")
   .get(protect, boardController.getBoardById) // Added: Get a single board by ID
   .put(protect, boardController.updateBoard); // Updates board title, etc.
 
@@ -43,6 +43,8 @@ router.put('/:boardId/layout', protect, boardController.updateBoardLayout);
 router.use("/:boardId/lists", protect, listRoutes);
 router.use("/:boardId/labels", protect, labelRoutes);
 router.use("/:boardId/activities", protect, activityRoutes);
+router.use("/:boardId/dnd", protect, dndRoutes);
 router.put("/:boardId/toggle-pin", protect, boardController.togglePinBoard);
+router.post("/:boardId/members", protect, boardController.addMemberToBoard);
 
 module.exports = router;
