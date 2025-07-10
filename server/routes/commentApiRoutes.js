@@ -9,7 +9,7 @@ const {
 
 // URL  /api/comments/:commentId
 router
-  .route(":/commentId")
+  .route("/:commentId")
   .put(protect, updateComment)
   .delete(protect, deleteComment);
 
