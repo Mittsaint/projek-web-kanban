@@ -23,7 +23,7 @@ router
 
 // Route for a specific board
 router
-  .route(":/boardId")
+  .route("/:boardId")
   .get(protect, boardController.getBoardById) // Added: Get a single board by ID
   .put(protect, boardController.updateBoard); // Updates board title, etc.
 
