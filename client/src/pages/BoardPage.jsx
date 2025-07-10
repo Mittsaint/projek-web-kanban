@@ -14,6 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 
 import boardService from "../services/boardService";
+import apiClient from "../services/apiClient"; // Added missing import
 import { useAuth } from "../hooks/useAuth";
 
 // Import komponen-komponen terpisah
@@ -34,6 +35,7 @@ const BoardDetailPage = () => {
 
   const [selectedCard, setSelectedCard] = useState(null);
   const [isMembersOpen, setIsMembersOpen] = useState(false);
+  const [isMember, setIsMember] = useState(true);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
 
   const [isAddingList, setIsAddingList] = useState(false);
@@ -43,6 +45,7 @@ const BoardDetailPage = () => {
 
   const fetchBoardData = useCallback(async () => {
     try {
+      setIsLoading(true);
       const data = await boardService.boards.getDetails(boardId);
       const newBoard = { ...data };
       const newLists = data.lists.map((list) => ({
@@ -53,7 +56,15 @@ const BoardDetailPage = () => {
       setBoard(newBoard);
       setLists(newLists);
 
-      // Gunakan ref, bukan selectedCard langsung
+      // Check if user is member
+      const memberIds = newBoard.members?.map((m) => m._id) || [];
+      if (!memberIds.includes(user?._id)) {
+        setIsMember(false);
+      } else {
+        setIsMember(true);
+      }
+
+      // Update selected card if it exists
       const currentCard = selectedCardRef.current;
       if (currentCard) {
         const freshCard = newLists
@@ -68,11 +79,15 @@ const BoardDetailPage = () => {
       }
     } catch (error) {
       console.error("Failed to fetch board data:", error);
-      setError("Could not load board.");
+      if (error.response?.status === 403) {
+        setIsMember(false);
+      } else {
+        setError("Could not load board.");
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [boardId]);
+  }, [boardId, user]);
 
   useEffect(() => {
     fetchBoardData();
@@ -90,21 +105,30 @@ const BoardDetailPage = () => {
     if (!user || !user.email || !boardId || !board) return;
 
     // Cek apakah user belum jadi member
-    const isMember = board.members?.some(
+    const isMemberCheck = board.members?.some(
       (member) => member.email === user.email
     );
-    if (!isMember) {
+    if (!isMemberCheck) {
       boardService.members
-        .invite(boardId, { email: user.email }) // PENTING: kirim sebagai body
+        .invite(boardId, { email: user.email })
         .then(() => {
           console.log("✅ Auto-joined board as member.");
-          fetchBoardData(); // refresh setelah join
+          fetchBoardData();
         })
         .catch((err) => {
           console.error("❌ Failed to auto-join board:", err);
         });
     }
-  }, [user, boardId, board]);
+  }, [user, boardId, board, fetchBoardData]);
+
+  const handleJoinBoard = async () => {
+    try {
+      await apiClient.post(`/api/boards/${boardId}/join`);
+      await fetchBoardData();
+    } catch (err) {
+      console.error("Failed to join board:", err);
+    }
+  };
 
   const handleCreateList = async (e) => {
     e.preventDefault();
@@ -115,7 +139,8 @@ const BoardDetailPage = () => {
       setIsAddingList(false);
       fetchBoardData();
     } catch (error) {
-      alert("Failed to create list.", error);
+      console.error("Failed to create list:", error);
+      alert("Failed to create list.");
     }
   };
 
@@ -124,7 +149,8 @@ const BoardDetailPage = () => {
       await boardService.cards.create(listId, { title });
       fetchBoardData();
     } catch (error) {
-      alert("Failed to create card.", error);
+      console.error("Failed to create card:", error);
+      alert("Failed to create card.");
     }
   };
 
@@ -133,7 +159,8 @@ const BoardDetailPage = () => {
       await boardService.lists.delete(listId);
       fetchBoardData();
     } catch (error) {
-      alert("Failed to delete the list.", error);
+      console.error("Failed to delete list:", error);
+      alert("Failed to delete the list.");
     }
   };
 
@@ -288,6 +315,20 @@ const BoardDetailPage = () => {
     );
   }
 
+  if (!isMember) {
+    return (
+      <div className="text-center mt-20">
+        <p className="text-lg font-semibold mb-4">You are not a member of this board.</p>
+        <button
+          onClick={handleJoinBoard}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Join Board
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white relative overflow-hidden">
       {/* Background decoration */}
@@ -297,7 +338,6 @@ const BoardDetailPage = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* SINGLE DndContext - Hapus yang duplicate */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
