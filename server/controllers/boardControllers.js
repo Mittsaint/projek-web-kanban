@@ -87,7 +87,7 @@ exports.getArchivedBoards = async (req, res) => {
 // Get board by ID with access validation
 exports.getBoardById = async (req, res) => {
   try {
-    const board = await Board.findById(req.params.id)
+    let board = await Board.findById(req.params.id)
       .populate("members", "name email")
       .populate({
         path: "lists",
@@ -103,8 +103,18 @@ exports.getBoardById = async (req, res) => {
     );
 
     if (!isMember) {
+      // Push ke DB
       board.members.push(req.user._id);
       await board.save();
+
+      // Populate ulang board yang sudah diubah
+      board = await Board.findById(req.params.id)
+        .populate("members", "name email")
+        .populate({
+          path: "lists",
+          populate: { path: "cards" },
+        });
+
       console.log(`${req.user.email} joined board ${board._id}`);
     }
 
@@ -112,6 +122,33 @@ exports.getBoardById = async (req, res) => {
   } catch (error) {
     console.error("Get board error:", error);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update board title (only owner)
+exports.updateBoard = async (req, res) => {
+  try {
+    const board = await Board.findById(req.params.boardId);
+    if (!board) return res.status(404).json({ msg: "Board not found" });
+
+    if (board.ownerId.toString() !== req.user.id) {
+      return res.status(403).json({ msg: "Only owner can update" });
+    }
+
+    board.title = req.body.title || board.title;
+    const updatedBoard = await board.save();
+
+    await logActivity({
+      boardId: board._id,
+      userId: req.user.id,
+      actionType: "UPDATE_BOARD",
+      description: `changed board name to \"${updatedBoard.title}\"`,
+    });
+
+    res.json(updatedBoard);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
 };
 
