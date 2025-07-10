@@ -19,7 +19,7 @@ router.post("/register", async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       provider: "local",
     });
 
