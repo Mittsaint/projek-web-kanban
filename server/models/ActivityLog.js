@@ -1,4 +1,7 @@
 // ==================== ActivityLog Schema ====================
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
 const ActivityLogSchema = new Schema(
   {
     BoardId: {
