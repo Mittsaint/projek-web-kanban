@@ -87,7 +87,7 @@ exports.getArchivedBoards = async (req, res) => {
 // Get board by ID with access validation
 exports.getBoardById = async (req, res) => {
   try {
-    const board = await Board.findById(req.params.id)
+    const board = await Board.findById(req.params.boardId)
       .populate("members", "name email")
       .populate({
         path: "lists",
