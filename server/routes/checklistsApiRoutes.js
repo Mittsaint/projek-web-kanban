@@ -9,7 +9,6 @@ const {
 } = require("../controllers/checklistController");
 const { protect } = require("../middleware/authMiddleware");
 
-// --- FIXED routes for Checklist ---
 // DELETE /api/checklists/:checklistId
 router.route("/:checklistId").delete(protect, deleteChecklist);
 

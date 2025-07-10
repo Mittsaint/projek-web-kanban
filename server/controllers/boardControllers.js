@@ -14,7 +14,10 @@ const hasBoardAccess = (board, userId) => {
 
 // Create new board
 exports.createBoard = async (req, res) => {
-  const { title } = req.body;
+  const { title } = req.body || {};
+  if (!title) {
+    return res.status(400).json({ message: "Title is required" });
+  }
 
   try {
     const newBoard = new Board({
@@ -85,8 +88,8 @@ exports.getArchivedBoards = async (req, res) => {
 exports.getBoardById = async (req, res) => {
   try {
     const board = await Board.findById(req.params.boardId)
-      .populate("members", "name email") 
-      .populate("ownerId", "name email"); 
+      .populate("members", "name email")
+      .populate("ownerId", "name email");
 
     if (!board) {
       return res.status(404).json({ msg: "Board not found" });
@@ -347,7 +350,9 @@ exports.addMemberToBoard = async (req, res) => {
 
   // Optional: Only owner can invite
   if (board.ownerId.toString() !== req.user.id) {
-    return res.status(403).json({ msg: "Only the board owner can invite members" });
+    return res
+      .status(403)
+      .json({ msg: "Only the board owner can invite members" });
   }
 
   if (!board.members.includes(user._id)) {
@@ -371,4 +376,3 @@ exports.addMemberToBoard = async (req, res) => {
     },
   });
 };
-

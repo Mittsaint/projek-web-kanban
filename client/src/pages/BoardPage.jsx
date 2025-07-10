@@ -14,6 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 
 import boardService from "../services/boardService";
+import { useAuth } from "../contexts/AuthContext";
 
 // Import komponen-komponen terpisah
 import ListColumn from "../components/board/ListColumn";
@@ -28,6 +29,7 @@ const BoardDetailPage = () => {
   const [lists, setLists] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
   const [activeId, setActiveId] = useState(null);
 
   const [selectedCard, setSelectedCard] = useState(null);
@@ -83,6 +85,26 @@ const BoardDetailPage = () => {
   useEffect(() => {
     selectedCardRef.current = selectedCard;
   }, [selectedCard]);
+
+  useEffect(() => {
+    if (!user || !user.email || !boardId || !board) return;
+
+    // Cek apakah user belum jadi member
+    const isMember = board.members?.some(
+      (member) => member.email === user.email
+    );
+    if (!isMember) {
+      boardService.members
+        .invite(boardId, { email: user.email }) // PENTING: kirim sebagai body
+        .then(() => {
+          console.log("✅ Auto-joined board as member.");
+          fetchBoardData(); // refresh setelah join
+        })
+        .catch((err) => {
+          console.error("❌ Failed to auto-join board:", err);
+        });
+    }
+  }, [user, boardId, board]);
 
   const handleCreateList = async (e) => {
     e.preventDefault();
@@ -148,7 +170,7 @@ const BoardDetailPage = () => {
       console.log("📋 Moving list...");
       const oldIndex = lists.findIndex((list) => list._id === active.id);
       const newIndex = lists.findIndex((list) => list._id === over.id);
-      
+
       if (oldIndex === -1 || newIndex === -1) {
         setActiveId(null);
         return;
