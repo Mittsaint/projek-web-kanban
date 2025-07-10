@@ -87,7 +87,7 @@ exports.getArchivedBoards = async (req, res) => {
 // Get board by ID with access validation
 exports.getBoardById = async (req, res) => {
   try {
-    let board = await Board.findById(req.params.id)
+    const board = await Board.findById(req.params.id)
       .populate("members", "name email")
       .populate({
         path: "lists",
@@ -98,24 +98,15 @@ exports.getBoardById = async (req, res) => {
       return res.status(404).json({ message: "Board not found" });
     }
 
+    // Validasi akses: user harus owner atau member
     const isMember = board.members.some(
       (member) => member._id.toString() === req.user._id.toString()
     );
 
-    if (!isMember) {
-      // Push ke DB
-      board.members.push(req.user._id);
-      await board.save();
+    const isOwner = board.ownerId.toString() === req.user._id.toString();
 
-      // Populate ulang board yang sudah diubah
-      board = await Board.findById(req.params.id)
-        .populate("members", "name email")
-        .populate({
-          path: "lists",
-          populate: { path: "cards" },
-        });
-
-      console.log(`${req.user.email} joined board ${board._id}`);
+    if (!isMember && !isOwner) {
+      return res.status(403).json({ message: "You are not a member of this board." });
     }
 
     return res.status(200).json(board);
@@ -124,6 +115,7 @@ exports.getBoardById = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // Update board title (only owner)
 exports.updateBoard = async (req, res) => {
@@ -398,4 +390,32 @@ exports.addMemberToBoard = async (req, res) => {
       email: user.email,
     },
   });
+};
+
+exports.joinBoard = async (req, res) => {
+  try {
+    const board = await Board.findById(req.params.id);
+    if (!board) return res.status(404).json({ message: "Board not found" });
+
+    const alreadyMember = board.members.some(
+      (member) => member.toString() === req.user._id.toString()
+    );
+
+    if (!alreadyMember) {
+      board.members.push(req.user._id);
+      await board.save();
+
+      await logActivity({
+        boardId: board._id,
+        userId: req.user.id,
+        actionType: "JOIN_BOARD",
+        description: `${req.user.email} joined the board.`,
+      });
+    }
+
+    return res.status(200).json({ message: "Joined board successfully" });
+  } catch (err) {
+    console.error("Join board error:", err);
+    return res.status(500).json({ message: "Server Error" });
+  }
 };

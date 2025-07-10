@@ -46,5 +46,6 @@ router.use("/:boardId/activities", protect, activityRoutes);
 router.use("/:boardId/dnd", protect, dndRoutes);
 router.put("/:boardId/toggle-pin", protect, boardController.togglePinBoard);
 router.post("/:boardId/members", protect, boardController.addMemberToBoard);
+router.post("/boards/:id/join", protect, boardController.joinBoard);
 
 module.exports = router;
