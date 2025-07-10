@@ -29,8 +29,10 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['https://boardly-two.vercel.app', 'http://localhost:3000'],
-  credentials: true
+  origin: process.env.CLIENT_URL, // Pastikan ini adalah URL Vercel frontend Anda
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Tambahkan OPTIONS secara eksplisit jika perlu
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'] // Header yang diizinkan
 }));
 
 app.use(express.json());
