@@ -28,12 +28,10 @@ const app = express();
 
 
 // Middleware
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: ['https://boardly-two.vercel.app', 'http://localhost:3000'],
+  credentials: true
+}));
 
 app.use(express.json());
 app.use(passport.initialize());
