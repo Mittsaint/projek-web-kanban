@@ -1,0 +1,53 @@
+{
+  "sidebar": {
+    "settings": "Pengaturan",
+    "profile": "Profil",
+    "security": "Keamanan",
+    "privacy": "Privasi",
+    "accessibility": "Aksesibilitas"
+  },
+  "profilePage": {
+    "title": "Informasi Profil",
+    "description": "Perbarui foto dan detail pribadi Anda."
+  },
+  "securityPage": {
+    "changePasswordTitle": "Ubah Kata Sandi",
+    "changePasswordDescription": "Perbarui kata sandi Anda untuk meningkatkan keamanan.",
+    "loginSessionsTitle": "Sesi Login",
+    "loginSessionsDescription": "Ini adalah daftar perangkat yang telah masuk ke akun Anda."
+  },
+  "privacyPage": {
+    "blockedUsersTitle": "Pengguna Diblokir",
+    "blockedUsersDescription": "Kelola pengguna yang telah Anda blokir. Mereka tidak akan bisa berinteraksi dengan Anda.",
+    "deleteAccountTitle": "Hapus Akun",
+    "deleteAccountDescription": "Hapus akun Anda dan semua konten Anda secara permanen."
+  },
+  "accessibilityPage": {
+    "languageTitle": "Bahasa",
+    "languageDescription": "Pilih bahasa yang ingin Anda gunakan di aplikasi.",
+    "appearanceTitle": "Tampilan",
+    "appearanceDescription": "Beralih antara mode terang dan gelap."
+  },
+  "buttons": {
+    "saveChanges": "Simpan Perubahan",
+    "saving": "Menyimpan...",
+    "cancel": "Batal",
+    "logout": "Keluar",
+    "deleteMyAccount": "Saya ingin menghapus akun saya"
+  },
+    "homePage": {
+    "welcomeTitle": "Welcome back, {userName}!",
+    "welcomeDescription": "Quickly access a board or create something new to get started.",
+    "searchPlaceholder": "Search your boards...",
+    "recentBoardsTitle": "Recent Boards",
+    "templatesTitle": "Start with a Template",
+    "templatesDescription": "Get a head start on your work with our ready-to-use templates.",
+    "kanbanTemplateTitle": "Kanban Board",
+    "kanbanTemplateDescription": "Classic To Do, In Progress, Done.",
+    "projectTrackerTemplateTitle": "Project Tracker",
+    "projectTrackerTemplateDescription": "Track tasks, priorities, and backlog.",
+    "noBoardsTitle": "Your workspace is ready!",
+    "noBoardsDescription": "Create your first board to start organizing your projects.",
+    "createFirstBoard": "Create Your First Board"
+  }
+}

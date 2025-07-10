@@ -1,0 +1,147 @@
+{
+  "sidebar": {
+    "settings": "Settings",
+    "profile": "Profile",
+    "security": "Security",
+    "privacy": "Privacy",
+    "accessibility": "Accessibility"
+  },
+  "buttons": {
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "logout": "Log out",
+    "deleteMyAccount": "I want to delete my account"
+  },
+  "guestPage": {
+    "heroTitle": "Organize Your Work, Clarify Your Life.",
+    "heroDescription": "The ultimate visual tool for teamwork. See everything from the big picture to the minute details.",
+    "getStartedButton": "Get Started - It's Free",
+    "loginLink": "Already have an account? Log In"
+  },
+  "homePage": {
+    "welcomeTitle": "Welcome back, {{userName}}!",
+    "welcomeDescription": "Here's what's happening with your projects today. Ready to dive in?",
+    "searchPlaceholder": "Search your boards...",
+    "recentBoardsTitle": "Recent Boards",
+    "templatesTitle": "Start with a Template",
+    "templatesDescription": "Get a head start on your work by choosing a ready-to-use template.",
+    "kanbanTemplateTitle": "Kanban Board",
+    "kanbanTemplateDescription": "Begin with the classic To Do, In Progress, and Done columns.",
+    "projectTrackerTemplateTitle": "Project Tracker",
+    "projectTrackerTemplateDescription": "Track tasks, priorities, and review stages.",
+    "noBoardsTitle": "Ready to get organized?",
+    "noBoardsDescription": "Your new project boards will appear here. Create one to get started!",
+    "createFirstBoard": "Create Your First Board",
+    "viewAllProjects": "View All Projects",
+    "allYourProjects": "All Your Projects"
+  },
+  "projectsPage": {
+    "pageTitle": "My Projects",
+    "pageDescription": "All your active projects are listed here. Click on a project to start collaborating.",
+    "createNewBoard": "Create New Board",
+    "loading": "Loading your projects...",
+    "noProjectsTitle": "No Projects Yet",
+    "noProjectsDescription": "Get started by creating your first project board.",
+    "members": "Members",
+    "lastUpdated": "Last updated"
+  },
+  "profilePage": {
+    "title": "Profile",
+    "description": "This information will be displayed publicly so be careful what you share.",
+    "updateSuccess": "Profile updated successfully!",
+    "updateError": "Failed to update profile.",
+    "uploadError": "Image upload failed. Please try again.",
+    "nameLabel": "Name",
+    "genderLabel": "Gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderOther": "Other",
+    "genderPrivate": "Prefer not to say",
+    "socialLinksTitle": "Social Links",
+    "websiteLabel": "Website",
+    "githubLabel": "GitHub",
+    "twitterLabel": "Twitter"
+  },
+  "securityPage": {
+    "changePasswordTitle": "Change Password",
+    "changePasswordDescription": "Update your password to a new one. It's a good practice to use a strong, unique password.",
+    "currentPasswordLabel": "Current Password",
+    "newPasswordLabel": "New Password",
+    "confirmNewPasswordLabel": "Confirm New Password",
+    "passwordMismatchError": "New passwords do not match.",
+    "updatePasswordButton": "Update Password",
+    "loginSessionsTitle": "Login Sessions",
+    "loginSessionsDescription": "This is a list of devices that have logged into your account. Revoke any sessions that you do not recognize.",
+    "thisDevice": "(This device)",
+    "revokeSession": "Revoke",
+    "sessionRevokedSuccess": "Session has been revoked.",
+    "sessionRevokedError": "Failed to revoke session."
+  },
+  "privacyPage": {
+    "blockedUsersTitle": "Blocked Users",
+    "blockedUsersDescription": "Manage users you've blocked. They won't be able to interact with you or see your content.",
+    "loadingBlockedUsers": "Loading blocked users...",
+    "noBlockedUsers": "No blocked users",
+    "noBlockedUsersDescription": "You haven't blocked anyone yet.",
+    "unblockUser": "Unblock",
+    "deleteAccountTitle": "Delete Account",
+    "deleteAccountDescription": "Permanently delete your account and all of your content. This action is not reversible. Please be certain.",
+    "deleteAccountButton": "I want to delete my account",
+    "deleteModalTitle": "Delete Account",
+    "deleteModalMessage": "Are you sure you want to delete your account? All of your data will be permanently removed. This action cannot be undone.",
+    "deleteModalConfirm": "Confirm Delete",
+    "deleteModalCancel": "Cancel"
+  },
+  "accessibilityPage": {
+    "title": "Accessibility",
+    "languageTitle": "Language",
+    "languageDescription": "Choose the language for the application.",
+    "appearanceTitle": "Appearance",
+    "appearanceDescription": "Customize the look and feel to your preference.",
+    "themeLight": "Light",
+    "themeDark": "Dark"
+  },
+  "archivedPage": {
+    "pageTitle": "Archived Items",
+    "pageDescription": "Here you can view, restore, or permanently delete your archived boards.",
+    "loading": "Loading archived boards...",
+    "noArchivedItemsTitle": "Nothing Here",
+    "noArchivedItemsDescription": "You don't have any archived boards yet.",
+    "archivedOn": "Archived on",
+    "unarchiveButton": "Restore",
+    "deleteButton": "Delete",
+    "unarchiveConfirm": "Are you sure you want to restore this board?",
+    "deleteConfirm": "This action is permanent and cannot be undone. Are you sure you want to delete this board forever?",
+    "unarchiveSuccess": "Board restored successfully.",
+    "unarchiveError": "Failed to restore board.",
+    "deleteSuccess": "Board permanently deleted.",
+    "deleteError": "Failed to delete board."
+  },
+  "activityPage": {
+    "pageTitle": "My Activity",
+    "pageDescription": "A log of recent activities from all of your projects.",
+    "loading": "Loading your activities...",
+    "noActivityTitle": "No Recent Activity",
+    "noActivityDescription": "Actions you take on your boards and cards will appear here.",
+    "groupBy": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    }
+  },
+  "modals": {
+    "createBoardTitle": "Create a New Board",
+    "boardTitleLabel": "Board Title",
+    "boardTitlePlaceholder": "e.g., Q4 Marketing Campaign",
+    "boardDescriptionLabel": "Description (Optional)",
+    "boardDescriptionPlaceholder": "Add a short description for your new board...",
+    "createButton": "Create Board",
+    "creatingButton": "Creating...",
+    "cancelButton": "Cancel"
+  },
+  "notifications": {
+    "cardCopiedSuccess": "Card '{{cardTitle}}' was copied successfully.",
+    "cardDeleteSuccess": "Card was deleted.",
+    "generalError": "Something went wrong. Please try again."
+  }
+}
