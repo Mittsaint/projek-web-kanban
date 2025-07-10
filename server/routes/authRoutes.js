@@ -1,10 +1,83 @@
-// routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const generateToken = require('../utils/generateToken')
+const bcrypt = require('bcryptjs');
+const User = require('../models/userModel');
+const generateToken = require('../utils/generateToken');
 
+// ===========================
+// Manual Register
+// ===========================
+router.post('/register', async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      provider: "local"
+    });
+
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      provider: user.provider,
+      token
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "Registration failed" });
+  }
+});
+
+// ===========================
+// Manual Login
+// ===========================
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || user.provider !== "local") {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      provider: user.provider,
+      token
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Login failed" });
+  }
+});
+
+// ===========================
 // Google OAuth routes
+// ===========================
 router.get('/google', 
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
@@ -13,10 +86,8 @@ router.get('/google/callback',
   passport.authenticate('google', { session: false }),
   async (req, res) => {
     try {
-      // Generate JWT token
       const token = generateToken(req.user._id);
-      
-      // Prepare user data
+
       const userData = {
         _id: req.user._id,
         name: req.user.name,
@@ -24,13 +95,11 @@ router.get('/google/callback',
         role: req.user.role,
         provider: req.user.provider,
         profilePictureUrl: req.user.profilePictureUrl,
-        token: token
+        token
       };
 
-      // Send message to parent window (frontend)
       res.send(`
         <script>
-          console.log('Google auth callback successful');
           window.opener.postMessage({
             type: 'GOOGLE_AUTH_SUCCESS',
             user: ${JSON.stringify(userData)}
@@ -42,7 +111,6 @@ router.get('/google/callback',
       console.error('Google auth callback error:', error);
       res.send(`
         <script>
-          console.error('Google auth callback failed');
           window.opener.postMessage({
             type: 'GOOGLE_AUTH_ERROR',
             error: 'Authentication failed'
