@@ -25,6 +25,9 @@ const BoardSchema = new Schema({
     type: Boolean,
     default: false,
   },
+   description: {
+    type: String,
+    default: "",
 
   createdAt: {
     type: Date,
