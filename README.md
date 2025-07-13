@@ -32,8 +32,8 @@
 * **Context API / Redux**
 * **Axios**
 * **react-beautiful-dnd**
-* **TailwindCSS** (atau styling yang kamu pakai)
-
+* **TailwindCSS**
+  
 ### Backend (Express) — Hosted on **Railway**
 
 * **Node.js + Express.js**
