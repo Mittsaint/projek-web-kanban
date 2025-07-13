@@ -146,7 +146,7 @@ CLIENT_URL=http://localhost:5173
 
 🎓 Catatan Akademik
 
-Game ini dikembangkan sebagai bagian dari proyek tugas akhir matakuliah Teknik Pemrograman Terstruktur 2 di Universitas Gunadarma. Dokumen lengkap pengembangannya dapat ditemukan pada makalah ini.
+Web ini dikembangkan sebagai bagian dari proyek tugas akhir matakuliah Pemrograman Berbasis Web 2 di Universitas Gunadarma. Dokumen lengkap pengembangannya dapat ditemukan pada makalah ini.
 
 ## 📜 Lisensi
 
